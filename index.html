@@ -3,264 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>贴片机科普指南 · 从零了解SMT核心设备</title>
+<title>贴片机技术解析 · 从零了解SMT核心设备</title>
 <style>
+/* ==================== Reset & Base ==================== */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;scroll-padding-top:72px;}
-body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f8fafc;color:#1e293b;line-height:1.7;overflow-x:hidden;}
-:root{--primary:#2563eb;--primary-light:#3b82f6;--primary-dark:#1d4ed8;--accent:#0ea5e9;--card:#fff;--text:#1e293b;--text-light:#64748b;--border:#e2e8f0;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--gradient:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);}
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;}
-nav.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.08);}
-.nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:var(--primary-dark);white-space:nowrap;}
-.nav-links{display:flex;gap:8px;}
-.nav-links a{color:var(--text-light);text-decoration:none;font-size:13px;font-weight:500;padding:8px 12px;border-radius:8px;transition:all .2s;}
-.nav-links a:hover,.nav-links a.active{color:var(--primary);background:rgba(37,99,235,.08);}
-.nav-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--gradient);transition:width .3s;width:0;}
-section{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px 48px;}
-.section-inner{width:100%;max-width:1000px;}
-.section-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:0.1em;color:var(--primary);text-transform:uppercase;margin-bottom:8px;}
-.section-title{font-size:clamp(28px,4vw,40px);font-weight:700;color:var(--primary-dark);line-height:1.3;margin-bottom:12px;}
-.section-sub{color:var(--text-light);font-size:16px;line-height:1.8;margin-bottom:40px;max-width:640px;}
-#hero{background:var(--gradient);color:#fff;padding-top:64px;min-height:100vh;}
+html{scroll-behavior:smooth;}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;background:#f1f5f9;color:#1e293b;overflow-x:hidden;}
+
+/* ==================== Nav ==================== */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #e2e8f0;padding:0 32px;height:52px;display:flex;align-items:center;justify-content:space-between;}
+nav .logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:#1e3a5f;letter-spacing:0.02em;}
+nav .logo svg{width:24px;height:24px;}
+.logo-sub{font-size:11px;color:#64748b;font-weight:400;margin-left:8px;padding-left:8px;border-left:1px solid #cbd5e1;}
+.nav-dots{display:flex;gap:4px;}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;border:none;}
+.nav-dot.active{background:#1e3a5f;}
+.nav-dot:hover{background:#94a3b8;}
+.nav-progress{position:absolute;bottom:0;left:0;height:2px;background:#1e3a5f;transition:width .4s;}
+
+/* ==================== Sections ==================== */
+section{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:72px 32px 48px;position:relative;}
+.section-inner{width:100%;max-width:960px;}
+.section-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:0.08em;color:#3b82f6;text-transform:uppercase;margin-bottom:8px;}
+.section-title{font-size:clamp(24px,4vw,36px);font-weight:700;color:#1e3a5f;line-height:1.3;margin-bottom:12px;letter-spacing:-0.01em;}
+.section-sub{color:#64748b;font-size:15px;line-height:1.7;margin-bottom:36px;max-width:640px;}
+
+/* ==================== Hero ==================== */
+#hero{background:linear-gradient(135deg,#1e3a5f 0%,#1a365d 50%,#153e6f 100%);color:#fff;padding-top:52px;overflow:hidden;justify-content:center;}
+#hero .hero-bg-canvas{position:absolute;inset:0;opacity:.08;pointer-events:none;}
 #hero .section-inner{display:flex;flex-direction:column;align-items:center;text-align:center;}
-.hero-badge{font-size:12px;font-weight:600;letter-spacing:0.15em;color:rgba(255,255,255,.6);margin-bottom:20px;}
-#hero h1{font-size:clamp(32px,5.5vw,56px);font-weight:800;line-height:1.2;margin-bottom:20px;}
-#hero h1 .highlight{background:linear-gradient(135deg,#60a5fa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-#hero .subtitle{font-size:clamp(16px,2vw,20px);opacity:.8;max-width:600px;margin-bottom:32px;}
-.hero-card{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border-radius:16px;padding:24px 32px;display:flex;align-items:center;gap:20px;border:1px solid rgba(255,255,255,.15);max-width:700px;}
-.hero-card .icon{font-size:32px;}
-.hero-card .text{font-size:15px;text-align:left;color:rgba(255,255,255,.9);}
-.hero-card .text strong{color:#60a5fa;}
-#line{background:#fff;}
-.line-container{background:var(--card);border-radius:16px;padding:32px;border:1px solid var(--border);}
-.line-canvas-wrap{width:100%;height:320px;}
-.line-canvas-wrap canvas{width:100%;height:100%;}
-.line-controls{display:flex;justify-content:center;align-items:center;gap:24px;margin-top:20px;padding:16px;background:#f8fafc;border-radius:12px;}
-.speed-control{display:flex;align-items:center;gap:12px;}
-.speed-control label{font-size:13px;color:var(--text-light);font-weight:500;}
-.speed-slider{-webkit-appearance:none;width:120px;height:6px;border-radius:3px;background:var(--border);outline:none;}
-.speed-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--primary);cursor:pointer;}
-.speed-value{font-size:13px;font-weight:600;color:var(--primary);min-width:35px;}
-.speed-btns{display:flex;gap:8px;}
-.speed-btns button{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
-.speed-btns button:hover,.speed-btns button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
-.line-steps{display:flex;justify-content:space-between;margin-top:16px;padding:0 40px;}
-.line-step{text-align:center;font-size:12px;color:var(--text-light);}
-.line-step .step-icon{font-size:20px;margin-bottom:4px;}
-.line-legend{display:flex;justify-content:center;gap:24px;margin-top:16px;flex-wrap:wrap;}
-.line-legend-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-light);}
-.line-legend-item .dot{width:10px;height:10px;border-radius:50%;}
-
-/* 基础知识 */
-#basics{background:#fff;}
-.basics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
-.basics-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;transition:all .3s;cursor:pointer;}
-.basics-card:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(37,99,235,0.1);}
-.basics-card.active{border-color:var(--primary);background:linear-gradient(135deg,rgba(37,99,235,.03),rgba(14,165,233,.03));}
-
-.basics-card .img-wrap{width:100%;height:160px;overflow:hidden;border-radius:8px;margin-bottom:12px;background:#f1f5f9;cursor:pointer;position:relative;transition:all .3s;}.basics-card .img-wrap:hover{transform:scale(1.02);box-shadow:0 4px 12px rgba(0,0,0,0.1);}.basics-card .img-wrap::after{content:"🔍 点击放大";position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;opacity:0;transition:opacity .3s;}.basics-card .img-wrap:hover::after{opacity:1;}
-.basics-card .img-wrap img{width:100%;height:100%;object-fit:cover;}
-.basics-card .header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.basics-card .icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
-.basics-card .title{font-size:18px;font-weight:600;color:var(--text);}
-.basics-card .subtitle{font-size:12px;color:var(--text-light);margin-top:2px;}
-.basics-card .desc{font-size:14px;color:var(--text-light);line-height:1.6;}
-.basics-card .detail{margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:block;}
-.basics-card.active .detail{display:none;}
-.basics-card .detail p{font-size:13px;color:var(--text-light);line-height:1.6;margin-bottom:8px;}
-.basics-card .detail p:last-child{margin-bottom:0;}
-.basics-card .detail strong{color:var(--text);}
-.basics-card .tags{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
-.basics-card .tag{padding:4px 10px;background:rgba(37,99,235,.08);color:var(--primary);border-radius:4px;font-size:11px;font-weight:500;}
-
-/* 贴片机结构 */
-#structure{background:#f1f5f9;}
-.structure-container{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;}
-@media(max-width:768px){.structure-container{grid-template-columns:1fr;}}
-.structure-diagram{background:var(--card);border-radius:16px;padding:32px;border:1px solid var(--border);position:relative;}
-.structure-diagram canvas{width:100%;height:400px;}
-.structure-list{display:flex;flex-direction:column;gap:16px;}
-.structure-item{background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--border);cursor:pointer;transition:all .3s;}
-.structure-item:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(37,99,235,0.1);}
-.structure-item.active{border-color:var(--primary);background:linear-gradient(135deg,rgba(37,99,235,.05),rgba(14,165,233,.05));}
-.structure-item .header{display:flex;align-items:center;gap:12px;}
-.structure-item .icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.structure-item .title{font-size:16px;font-weight:600;color:var(--text);}
-.structure-item .desc{font-size:13px;color:var(--text-light);margin-top:8px;line-height:1.6;}
-.structure-item .structure-item-img{width:100%;height:100px;overflow:hidden;border-radius:8px;margin-bottom:12px;background:#f1f5f9;}
-.structure-item .structure-item-img img{width:100%;height:100%;object-fit:cover;}
-.structure-item .structure-item-img:empty{display:none;}
-
-#principle{background:#f1f5f9;}
-.step-controls{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:24px;}
-.step-controls button{width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:#fff;cursor:pointer;font-size:18px;color:var(--text);transition:all .2s;}
-.step-controls button:hover:not(:disabled){border-color:var(--primary);color:var(--primary);}
-.step-controls button:disabled{opacity:.4;cursor:not-allowed;}
-.step-indicators{display:flex;gap:8px;}
-.step-ind{width:10px;height:10px;border-radius:50%;background:var(--border);transition:all .3s;}
-.step-ind.active{background:var(--primary);transform:scale(1.2);}
-.step-label{font-size:13px;color:var(--text-light);font-weight:500;}
-.inside-canvas-wrap{background:var(--card);border-radius:16px;padding:24px;border:1px solid var(--border);margin-bottom:20px;}
-.inside-canvas-wrap canvas{width:100%;height:420px;}
-.step-desc-box{background:linear-gradient(135deg,rgba(37,99,235,.05),rgba(14,165,233,.05));border:1px solid rgba(37,99,235,.2);border-radius:12px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px;}
-.step-desc-box .step-num{width:36px;height:36px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
-.step-desc-box .step-content h4{font-size:16px;font-weight:600;color:var(--primary-dark);margin-bottom:4px;}
-.step-desc-box .step-content p{font-size:14px;color:var(--text-light);}
-
-#components{background:#fff;}
-.components-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
-.component-item{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .3s;}
-.component-item:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(37,99,235,0.1);}
-.component-item.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,0.15);}
-.component-item .img-wrap{width:100%;height:140px;overflow:hidden;background:#f1f5f9;}
-.component-item .img-wrap img{width:100%;height:100%;object-fit:cover;}
-.component-item .info{padding:16px;}
-.component-item .prefix{font-size:11px;color:var(--primary);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;}
-.component-item .label{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;}
-.component-item .desc{font-size:12px;color:var(--text-light);line-height:1.5;}
-.component-item .detail{padding:16px;background:linear-gradient(135deg,rgba(37,99,235,.03),rgba(14,165,233,.03));border-top:1px solid var(--border);display:none;}
-.component-item.active .detail{display:block;}
-.component-item .detail p{font-size:13px;color:var(--text-light);line-height:1.6;margin-bottom:8px;}
-.component-item .detail p:last-child{margin-bottom:0;}
-.component-item .detail strong{color:var(--text);}
-
-#features{background:#f1f5f9;}
-.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-@media(max-width:768px){.features-grid{grid-template-columns:1fr;}}
-.feature-card{background:var(--card);border-radius:16px;padding:28px;border:1px solid var(--border);transition:all .3s;}
-.feature-card:hover{box-shadow:0 12px 32px rgba(0,0,0,.08);}
-.feature-card .icon{font-size:28px;margin-bottom:12px;}
-.feature-card h3{font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;}
-.feature-card p{font-size:14px;color:var(--text-light);margin-bottom:16px;}
-.demo-area{background:#f8fafc;border-radius:12px;height:200px;position:relative;overflow:hidden;margin-bottom:12px;}
-.demo-area canvas{width:100%;height:100%;}
-.demo-toggle{display:flex;gap:8px;}
-.demo-toggle button{flex:1;padding:10px;border:1px solid var(--border);background:#fff;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
-.demo-toggle button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
-.demo-stats{display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--text-light);}
-.demo-stats span{display:flex;align-items:center;gap:4px;}
-.demo-stats strong{color:var(--primary);font-size:14px;}
-#brands{background:#fff;}
-.brands-tabs{display:flex;gap:8px;margin-bottom:24px;justify-content:center;}
-.brands-tabs button{padding:10px 20px;border:1px solid var(--border);background:#fff;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
-.brands-tabs button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
-.brand-content{display:none;}
-.brand-content.active{display:block;}
-.brand-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;}
-.brand-logo{width:64px;height:64px;background:var(--gradient);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;}
-.brand-info h3{font-size:22px;font-weight:700;color:var(--text);}
-.brand-info p{font-size:14px;color:var(--text-light);}
-.brand-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
-@media(max-width:768px){.brand-stats{grid-template-columns:repeat(2,1fr);}}
-.stat-card{background:#f8fafc;border-radius:12px;padding:16px;text-align:center;}
-.stat-card .label{font-size:12px;color:var(--text-light);margin-bottom:4px;}
-.stat-card .value{font-size:20px;font-weight:700;color:var(--primary);}
-.brand-features{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
-.brand-feature{display:flex;align-items:flex-start;gap:12px;padding:16px;background:#f8fafc;border-radius:12px;}
-.brand-feature .check{color:var(--success);font-size:18px;}
-.brand-feature .text h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;}
-.brand-feature .text p{font-size:13px;color:var(--text-light);}
-#problems{background:#f1f5f9;}
-.problems-list{display:flex;flex-direction:column;gap:16px;}
-.problem-item{background:var(--card);border-radius:12px;padding:20px 24px;border-left:4px solid var(--primary);display:flex;align-items:center;gap:16px;transition:all .3s;}
-.problem-item:hover{box-shadow:0 8px 24px rgba(0,0,0,.06);}
-.problem-num{width:40px;height:40px;background:var(--gradient);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
-.problem-text h4{font-size:16px;font-weight:600;color:var(--text);margin-bottom:2px;}
-.problem-text p{font-size:14px;color:var(--text-light);}
-.problem-tag{margin-left:auto;padding:6px 12px;background:rgba(37,99,235,.1);color:var(--primary);border-radius:6px;font-size:12px;font-weight:500;}
-#summary{background:var(--gradient);color:#fff;min-height:auto;padding:80px 32px;}
-.summary-card{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border-radius:20px;padding:48px;border:1px solid rgba(255,255,255,.15);text-align:center;}
-.summary-card h2{font-size:32px;font-weight:700;margin-bottom:16px;}
-.summary-card p{font-size:16px;opacity:.85;max-width:600px;margin:0 auto 32px;}
-.summary-formula{font-size:20px;font-weight:600;padding:20px 32px;background:rgba(255,255,255,.1);border-radius:12px;display:inline-block;}
-.summary-formula span{color:#60a5fa;}
-.fade-in{opacity:0;transform:translateY(30px);transition:all .6s cubic-bezier(.4,0,.2,1);}
-.fade-in.visible{opacity:1;transform:translateY(0);}
-
-/* Lightbox */
-.lightbox{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:9999;display:none;align-items:center;justify-content:center;cursor:pointer;}
-.lightbox.active{display:flex;}
-.lightbox img{max-width:90%;max-height:90%;object-fit:contain;border-radius:8px;}
-.lightbox .close{position:absolute;top:20px;right:20px;color:#fff;font-size:32px;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.1);border-radius:50%;}
-.lightbox .close:hover{background:rgba(255,255,255,0.2);}
+#hero .hero-eyebrow{font-size:12px;font-weight:600;letter-spacing:0.12em;color:rgba(255,255,255,.5);margin-bottom:20px;}
+#hero h1{font-size:clamp(30px,5.5vw,52px);font-weight:800;line-height:1.2;position:relative;z-index:1;letter-spacing:-0.02em;}
+#hero h1 .highlight{background:linear-gradient(135deg,#60a5fa,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+#hero .subtitle{font-size:clamp(16px,2vw,22px);margin-top:16px;opacity:.7;position:relative;z-index:1;font-weight:300;max-width:600px;}
+#hero .analogy-card{background:rgba(255,255,255,.06);backdrop-filter:blur(8px);border-radius:12px;padding:28px 36px;margin-top:32px;display:flex;align-items:center;gap:20px;border:1px solid rgba(255,255,255,.1);position:relative;z-index:1;max-width:700px;}
+#hero .analogy-card .analogy-icon{font-size:28px;flex-shrink:0;opacity:.8;}
+#hero .analogy-card .analogy-text{font-size:15px;line-height:1.7;text-align:left;color:rgba(255,255,255,.85);}
+#hero .analogy-card .analogy-text strong{color:#60a5fa;}
 </style>
 </head>
 <body>
 
-
-
-
-
-<!-- Lightbox -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <span class="close" onclick="closeLightbox()">×</span>
-  <img id="lightboxImg" src="" alt="放大图片">
-</div>
-
-<nav id="nav">
-  <div class="nav-logo">
-    <svg viewBox="0 0 28 28" fill="none"><rect x="2" y="6" width="24" height="16" rx="3" stroke="#2563eb" stroke-width="2" fill="none"/><circle cx="10" cy="14" r="2.5" fill="#2563eb"/><circle cx="18" cy="14" r="2.5" fill="#2563eb"/><path d="M7 6V4M21 6V4M7 22v2M21 22v2" stroke="#2563eb" stroke-width="2"/></svg>
-    贴片机科普指南
+<!-- ==================== Nav ==================== -->
+<nav>
+  <div class="logo">
+    <svg viewBox="0 0 28 28" fill="none"><rect x="2" y="6" width="24" height="16" rx="3" stroke="#1e3a5f" stroke-width="1.5" fill="none"/><circle cx="10" cy="14" r="2" fill="#1e3a5f"/><circle cx="18" cy="14" r="2" fill="#1e3a5f"/><path d="M7 6V4M21 6V4M7 22v2M21 22v2" stroke="#1e3a5f" stroke-width="1.5"/></svg>
+    贴片机技术解析<span class="logo-sub">SMT 核心设备 · 功能解析</span>
   </div>
-  <div class="nav-links">
-    <a href="#hero">首页</a><a href="#line">产线</a><a href="#components">元件</a><a href="#structure">结构</a><a href="#principle">原理</a><a href="#basics">概念</a><a href="#features">技术</a><a href="#brands">品牌</a><a href="#problems">痛点</a>
+  <div class="nav-dots">
+    <button class="nav-dot active" data-section="0"></button>
+    <button class="nav-dot" data-section="1"></button>
+    <button class="nav-dot" data-section="2"></button>
+    <button class="nav-dot" data-section="3"></button>
+    <button class="nav-dot" data-section="4"></button>
+    <button class="nav-dot" data-section="5"></button>
   </div>
-  <div class="nav-progress" id="navProgress"></div>
 </nav>
 
-
-
-
-
-
-
-
-
-
-
+<!-- ==================== Hero ==================== -->
 <section id="hero">
-  <div class="section-inner">
-    <div class="hero-badge">SMT ASSEMBLY TECHNOLOGY</div>
-    <h1>贴片机工作原理<br><span class="highlight">从一块 PCB 到一台设备</span></h1>
-    <p class="subtitle">每一块电子设备中的电阻、电容、芯片等微小元件，均由贴片机以微米级精度完成自动拾取与贴放</p>
-    <div class="hero-card">
-      <div class="icon">🎯</div>
-      <div class="text"><strong>一句话理解贴片机</strong><br>把电子元件自动贴到电路板上的高速机器人，是现代电子制造的核心装备</div>
+  <canvas class="hero-bg-canvas" id="heroCanvas"></canvas>
+  <div class="section-inner" style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;">
+    <div class="fade-in visible" style="text-align:center;">
+      <div class="hero-eyebrow">SMT ASSEMBLY TECHNOLOGY</div>
+      <h1>贴片机工作原理<br><span class="highlight">从一块 PCB 到一台设备</span></h1>
+    </div>
+    <div class="analogy-card fade-in visible">
+      <div class="analogy-icon">🔄</div>
+      <div class="analogy-text">
+        每一块电子设备中的电阻、电容、芯片等微小元件，<br>均由贴片机以微米级精度完成<strong>自动拾取与贴放</strong>
+      </div>
     </div>
   </div>
 </section>
 
-
-<section id="line">
+<!-- ==================== SMT Line ==================== -->
+<section id="smt-line">
   <div class="section-inner fade-in">
     <div class="section-tag">产线布局</div>
-    <h2 class="section-title">SMT 产线全景</h2>
-    <p class="section-sub">贴片机并非独立设备，而是整条自动化流水线的核心环节。观察PCB如何一步步变成成品</p>
+    <h2>SMT 产线全景</h2>
+    <p class="section-sub">贴片机并非独立设备，而是整条自动化流水线的核心环节</p>
     <div class="line-container">
-      <div class="line-canvas-wrap"><canvas id="lineCanvas"></canvas></div>
-      <div class="line-controls">
-        <div class="speed-control">
-          <label>动画速度：</label>
-          <input type="range" class="speed-slider" id="speedSlider" min="0.2" max="3" step="0.1" value="0.8">
-          <span class="speed-value" id="speedValue">0.8x</span>
-        </div>
-        <div class="speed-btns">
-          <button onclick="setSpeed(0.3)">慢速</button>
-          <button class="active" onclick="setSpeed(0.8)">正常</button>
-          <button onclick="setSpeed(1.5)">快速</button>
-          <button onclick="setSpeed(2.5)">极速</button>
-        </div>
-      </div>
-      <div class="line-steps">
-        <div class="line-step"><div class="step-icon">📋</div>空板</div>
-        <div class="line-step"><div class="step-icon">🔩</div>印锡膏</div>
-        <div class="line-step"><div class="step-icon">🔬</div>SPI检测</div>
-        <div class="line-step"><div class="step-icon">⚙️</div>贴元件</div>
-        <div class="line-step"><div class="step-icon">🔥</div>回流焊</div>
-        <div class="line-step"><div class="step-icon">✅</div>成品</div>
+      <div class="line-canvas-wrap">
+        <canvas id="lineCanvas"></canvas>
       </div>
       <div class="line-legend">
-        <span class="line-legend-item"><span class="dot" style="background:#0ea5e9;"></span> 印刷机</span>
+        <span class="line-legend-item"><span class="dot" style="background:#0891b2;"></span> 印刷机</span>
         <span class="line-legend-item"><span class="dot" style="background:#8b5cf6;"></span> SPI 检测</span>
         <span class="line-legend-item"><span class="dot" style="background:#f59e0b;"></span> 贴片机</span>
         <span class="line-legend-item"><span class="dot" style="background:#ef4444;"></span> 回流焊</span>
@@ -270,36 +98,11 @@ section{min-height:100vh;display:flex;flex-direction:column;align-items:center;j
   </div>
 </section>
 
-
-<section id="components">
-  <div class="section-inner fade-in">
-    <div class="section-tag">电子元件</div>
-    <h2 class="section-title">常见电子元件识别</h2>
-    <p class="section-sub">通过丝印标识快速识别 PCB 上的各类元件（点击展开详情）</p>
-    <div class="components-grid" id="componentsGrid"></div>
-  </div>
-</section>
-
-
-<section id="structure">
-  <div class="section-inner fade-in">
-    <div class="section-tag">设备结构</div>
-    <h2 class="section-title">贴片机核心结构</h2>
-    <p class="section-sub">了解贴片机的硬件组成，点击各部件查看详细说明</p>
-    <div class="structure-container">
-      <div class="structure-diagram">
-        <canvas id="structureCanvas"></canvas>
-      </div>
-      <div class="structure-list" id="structureList"></div>
-    </div>
-  </div>
-</section>
-
-
-<section id="principle">
+<!-- ==================== Inside ==================== -->
+<section id="inside">
   <div class="section-inner fade-in">
     <div class="section-tag">工作原理</div>
-    <h2 class="section-title">贴片机内部工作原理</h2>
+    <h2>贴片机内部工作原理</h2>
     <p class="section-sub">六步精密循环：从 PCB 进板到元件贴装完成</p>
     <div class="step-controls">
       <button id="stepPrev" disabled>‹</button>
@@ -307,458 +110,1187 @@ section{min-height:100vh;display:flex;flex-direction:column;align-items:center;j
       <button id="stepNext">›</button>
       <span class="step-label" id="stepLabel">1 / 6</span>
     </div>
-    <div class="inside-canvas-wrap"><canvas id="insideCanvas"></canvas></div>
-    <div class="step-desc-box">
-      <div class="step-num" id="stepNum">1</div>
-      <div class="step-content">
-        <h4 id="stepTitle">PCB 进板</h4>
-        <p id="stepText">PCB 板通过传送带进入机器，到达预定位置后停止，等待贴装</p>
-      </div>
+    <div class="inside-canvas-wrap">
+      <canvas id="insideCanvas"></canvas>
     </div>
+    <div class="inside-desc" id="insideDesc">PCB 板通过传送带进入机器，到达预定位置后停止</div>
   </div>
 </section>
 
-<section id="basics">
-  <div class="section-inner fade-in">
-    <div class="section-tag">基础知识</div>
-    <h2 class="section-title">贴片机核心概念</h2>
-    <p class="section-sub">掌握这些术语，理解贴片机的工作逻辑</p>
-    <div class="basics-grid" id="basicsGrid"></div>
-  </div>
-</section>
-
-
-
+<!-- ==================== Features ==================== -->
 <section id="features">
   <div class="section-inner fade-in">
-    <div class="section-tag">核心技术</div>
-    <h2 class="section-title">三大核心技术能力</h2>
+    <div class="section-tag">技术解析</div>
+    <h2>三大核心技术能力</h2>
     <p class="section-sub">贴片机如何兼顾精度、效率与良品率</p>
     <div class="features-grid">
       <div class="feature-card">
         <div class="icon">👁️</div>
         <h3>视觉对中系统</h3>
-        <p>吸嘴取件后经相机高速拍照，系统实时计算位置与角度偏差，贴装时自动补偿</p>
+        <p>吸嘴取件后经相机高速拍照，系统实时计算位置与角度偏差，贴装时自动补偿，确保 ±25μm 以内的放置精度</p>
         <div class="demo-area"><canvas id="visionDemo"></canvas></div>
-        <div class="demo-toggle"><button class="active" data-mode="with">有视觉</button><button data-mode="without">无视觉</button></div>
-        <div class="demo-stats"><span>精度: <strong id="visionAccuracy">±25μm</strong></span><span>补偿: <strong id="visionComp">自动</strong></span></div>
+        <div class="demo-toggle">
+          <button class="active" data-mode="with">有视觉</button>
+          <button data-mode="without">无视觉</button>
+        </div>
       </div>
       <div class="feature-card">
         <div class="icon">⚡</div>
         <h3>多吸嘴并行取贴</h3>
-        <p>一个贴装头上搭载 4-12 个吸嘴，单次往返可完成多颗元件的取料与贴放</p>
+        <p>一个贴装头上搭载 4-12 个吸嘴，单次往返可完成多颗元件的取料与贴放，产能可达 30,000 CPH 以上</p>
         <div class="demo-area"><canvas id="speedDemo"></canvas></div>
-        <div class="demo-toggle"><button class="active" data-mode="multi">多吸嘴</button><button data-mode="single">单吸嘴</button></div>
-        <div class="demo-stats"><span>产能: <strong id="speedCPH">30,000 CPH</strong></span><span>吸嘴: <strong id="speedNozzle">8个</strong></span></div>
+        <div class="demo-toggle">
+          <button class="active" data-mode="multi">多吸嘴</button>
+          <button data-mode="single">单吸嘴</button>
+        </div>
       </div>
       <div class="feature-card">
         <div class="icon">🛡️</div>
         <h3>智能质量管控</h3>
-        <p>坏板标记识别、真空吸力检测、元件缺失校验——全流程闭环质量控制</p>
+        <p>坏板标记识别、真空吸力检测、元件缺失校验——全流程闭环质量控制，杜绝缺陷品流至下一工序</p>
         <div class="demo-area"><canvas id="errorDemo"></canvas></div>
-        <div class="demo-toggle"><button class="active" data-mode="with">有防错</button><button data-mode="without">无防错</button></div>
-        <div class="demo-stats"><span>良率: <strong id="errorYield">99.9%</strong></span><span>检测: <strong id="errorCheck">实时</strong></span></div>
+        <div class="demo-toggle">
+          <button class="active" data-mode="with">有防错</button>
+          <button data-mode="without">无防错</button>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-
-<section id="brands">
+<!-- ==================== Simulation ==================== -->
+<section id="simulation">
   <div class="section-inner fade-in">
-    <div class="section-tag">品牌对比</div>
-    <h2 class="section-title">主流品牌对比</h2>
-    <p class="section-sub">四大品牌各有侧重：速度 vs 柔性 vs 稳定 vs 易用</p>
-    <div class="brands-tabs" id="brandsTabs"></div>
-    <div id="brandsContent"></div>
-  </div>
-</section>
-
-
-<section id="problems">
-  <div class="section-inner fade-in">
-    <div class="section-tag">行业痛点</div>
-    <h2 class="section-title">Top 5 行业痛点</h2>
-    <p class="section-sub">当前贴片机行业面临的核心挑战与AI赋能机会</p>
-    <div class="problems-list" id="problemsList"></div>
-  </div>
-</section>
-
-
-<section id="summary">
-  <div class="section-inner">
-    <div class="summary-card fade-in">
-      <div class="section-tag" style="color:rgba(255,255,255,.6);">核心要点</div>
-      <h2>贴片机 = 视觉系统 + 精密执行机构 + 智能控制系统</h2>
-      <p>本质上是一个高速、高精度的自动化拾取-对位-贴放闭环，将电子元件从供料器输送至 PCB 指定焊盘位置</p>
-      <div class="summary-formula"><span>高速贴片机</span> · 现代电子制造的核心装备</div>
+    <div class="section-tag">运行模拟</div>
+    <h2>全流程动态模拟</h2>
+    <p class="section-sub">完整贴装循环演示：PCB 进板 → 取料 → 视觉对位 → 贴装</p>
+    <div class="sim-canvas-wrap">
+      <canvas id="simCanvas"></canvas>
+    </div>
+    <div class="sim-controls">
+      <button class="play-btn" id="simPlayBtn">▶ 播放</button>
+      <button class="speed-btn active" data-speed="1">1×</button>
+      <button class="speed-btn" data-speed="2">2×</button>
+      <button class="speed-btn" data-speed="3">3×</button>
+      <button id="simResetBtn" class="reset-btn">↺ 重置</button>
+    </div>
+    <div class="sim-stats">
+      <span>贴装数量: <strong id="simCount">0</strong></span>
+      <span>循环次数: <strong id="simCycles">0</strong></span>
     </div>
   </div>
 </section>
 
+<!-- ==================== Summary ==================== -->
+<section id="summary">
+  <div class="section-inner fade-in">
+    <div class="summary-card">
+      <div class="section-tag">总结</div>
+      <h2 class="section-title" style="margin-bottom:20px;">核心要点回顾</h2>
+      <div class="summary-line">
+        贴片机 = <strong>视觉系统 + 精密执行机构 + 智能控制系统</strong><br>
+        本质上是一个高速、高精度的自动化拾取-对位-贴放闭环<br>
+        将电子元件从供料器输送至 PCB 指定焊盘位置
+      </div>
+      <div class="summary-tagline">高速贴片机 · 现代电子制造的核心装备</div>
+    </div>
+  </div>
+</section>
 
+<!-- ==================== JavaScript ==================== -->
 <script>
-// Lightbox功能
-function openLightbox(src) {
-  document.getElementById('lightboxImg').src = src;
-  document.getElementById('lightbox').classList.add('active');
-  document.body.style.overflow = 'hidden';
+// ====================== General Utils ======================
+function resizeCanvas(canvas, w, h) {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return ctx;
 }
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('active');
-  document.body.style.overflow = '';
+
+function getSize(el) {
+  const rect = el.getBoundingClientRect();
+  return [rect.width, rect.height];
 }
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeLightbox();
+
+// ====================== Navigation ======================
+const sections = document.querySelectorAll('section');
+const dots = document.querySelectorAll('.nav-dot');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const idx = Array.from(sections).indexOf(entry.target);
+      dots.forEach((d,i) => d.classList.toggle('active', i === idx));
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => observer.observe(s));
+
+dots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    const idx = parseInt(dot.dataset.section);
+    sections[idx].scrollIntoView({ behavior: 'smooth' });
+  });
 });
 
-let animationSpeed=0.8;
-function setSpeed(s){animationSpeed=s;document.getElementById('speedSlider').value=s;document.getElementById('speedValue').textContent=s.toFixed(1)+'x';document.querySelectorAll('.speed-btns button').forEach(b=>{b.classList.toggle('active',(b.textContent==='慢速'&&s===0.3)||(b.textContent==='正常'&&s===0.8)||(b.textContent==='快速'&&s===1.5)||(b.textContent==='极速'&&s===2.5));});}
-document.getElementById('speedSlider').addEventListener('input',function(){setSpeed(parseFloat(this.value));});
-
-const steps=[
-  {title:"PCB 进板",desc:"PCB 板通过传送带进入机器，到达预定位置后停止，等待贴装"},
-  {title:"供料器送料",desc:"供料器（Feeder）将元件带向前推进，吸嘴准备取料"},
-  {title:"吸嘴取料",desc:"贴装头移动到供料器上方，吸嘴下降吸取元件，真空检测确认取料成功"},
-  {title:"视觉对中",desc:"取料后经过高速相机拍照，系统计算位置与角度偏差，实时补偿"},
-  {title:"精准贴装",desc:"贴装头移动到 PCB 指定位置，吸嘴下降将元件精确贴放到焊盘上"},
-  {title:"质量检测",desc:"贴装完成后进行真空检测和视觉复检，确认元件位置正确"}
-];
-
-// 基础知识数据
-const basics=[
-  {name:"模组配置",subtitle:"Module Config",img:"structure/module.jpg",color:"#3b82f6",desc:"贴装单元，决定了设备的产能和适用场景",detail:"<p><strong>按模组数量分：</strong></p><p>&bull; <strong>单模（Single Module）：</strong>只有一个贴装头，适合简单产品、小批量</p><p>&bull; <strong>双模（Dual Module）：</strong>两个贴装头并行工作，产能翻倍</p><p>&bull; <strong>多模（Multi Module）：</strong>3-4个贴装头，超高速生产</p><p><strong>常见组合：</strong></p><p>&bull; 单模单轨：入门级，适合打样</p><p>&bull; 单模双轨：性价比之选</p><p>&bull; 双模双轨：高端配置，两个模组分别在两条轨道工作</p><p>&bull; 双模单轨：两个模组在同一轨道的不同区域工作，适合超大PCB</p>",tags:["单模","双模","产能配置"]},
-  {name:"轨道",subtitle:"Track / Rail",img:"structure/track.jpg",color:"#10b981",desc:"PCB板的传输通道，负责将电路板从入口输送到贴装位置",detail:"<p><strong>轨道类型：</strong>分为固定轨道和可调轨道，可调轨道可适应不同宽度的PCB板。</p><p><strong>传送方式：</strong>采用皮带或链条传动，配合传感器实现精确定位。</p><p><strong>按轨道数量分：</strong></p><p>&bull; <strong>单轨（Single Rail）：</strong>一条PCB传送轨道，标准配置</p><p>&bull; <strong>双轨（Dual Rail）：</strong>两条平行轨道，可同时处理两块PCB，大幅提升UPH</p>",tags:["传送带","定位","宽度调节","单轨","双轨"]},
-  {name:"台车/飞达车",subtitle:"Feeder Cart",img:"structure/cart.jpg",color:"#f59e0b",desc:"承载供料器的移动小车，可快速更换整组供料器，提高换线效率",detail:"<p><strong>台车作用：</strong>将多组供料器集成在一个台车上，实现快速换线。</p><p><strong>换线流程：</strong>拉出旧台车 → 推入新台车 → 系统自动识别物料。</p>",tags:["快速换线","物料管理"]},
-  {name:"供料器/飞达",subtitle:"Feeder",img:"structure/feeder.jpg",color:"#8b5cf6",desc:"安装在贴片机上的送料装置，将料带上的元件逐个输送到取料位置",detail:"<p><strong>供料器类型：</strong>电动供料器（精准、高速）和气动供料器。</p><p><strong>工作原理：</strong>通过棘轮机构，每次送料一个元件的间距。</p><p><strong>名称说明：</strong>供料器是正式中文译名，飞达是英文Feeder的音译，行业内两种叫法通用。</p><p><strong>常见说法：</strong>上飞达=安装供料器，飞达报警=供料器故障。</p>",tags:["送料","棘轮","快装","飞达(音译)"]},
-  {name:"料带",subtitle:"Component Tape",img:"structure/tape.jpg",color:"#f59e0b",desc:"承载元件的带状包装，元件按照固定间距排列在带子上",detail:"<p><strong>料带规格：</strong>常见宽度有8mm、12mm、16mm、24mm等。</p><p><strong>料带结构：</strong>包含元件孔（用于传动定位）和元件仓（放置元件）。</p>",tags:["包装","定位孔","元件仓"]},
-  {name:"吸嘴",subtitle:"Nozzle",img:"structure/nozzle.jpg",color:"#ef4444",desc:"贴装头末端的真空吸取装置，通过负压吸附元件",detail:"<p><strong>吸嘴类型：</strong>根据元件尺寸选择不同内径的吸嘴。</p><p><strong>材质选择：</strong>陶瓷、金属、塑料等。</p>",tags:["真空","内径","材质"]},
-  {name:"贴装头",subtitle:"Placement Head",img:"structure/head.jpg",color:"#0ea5e9",desc:"搭载多个吸嘴的核心运动部件，完成取料-对中-贴装循环",detail:"<p><strong>贴装头结构：</strong>包含旋转机构、吸嘴安装座、视觉识别窗口。</p><p><strong>吸嘴数量：</strong>高速机通常8-12个吸嘴。</p>",tags:["多吸嘴","旋转","高速"]},
-  {name:"Mark点",subtitle:"Fiducial Mark",img:"",color:"#64748b",desc:"PCB板上的定位基准点，贴片机通过识别Mark点确定板子位置",detail:"<p><strong>Mark点作用：</strong>消除PCB板在传输过程中的位置偏差。</p><p><strong>Mark点形状：</strong>通常是圆形或方形的铜箔点。</p>",tags:["定位","基准","视觉识别"]},
-  {name:"IC托盘柜",subtitle:"IC Tray Cabinet",img:"structure/ic_cabinet.jpg",color:"#ef4444",desc:"存放IC托盘的专用柜体，用于大型芯片的供料",detail:"<p><strong>适用元件：</strong>BGA、QFP等大型IC芯片。</p><p><strong>工作方式：</strong>托盘逐层送出，吸嘴从托盘中取料。</p>",tags:["IC托盘","大型芯片","BGA"]},
-  {name:"指示灯",subtitle:"Signal Light",img:"structure/signal_light.jpg",color:"#059669",desc:"设备顶部的状态指示灯，通过不同颜色显示设备运行状态",detail:"<p><strong>绿色：</strong>正常运行中。</p><p><strong>黄色：</strong>待机或需要人工干预。</p><p><strong>红色：</strong>故障停机。</p>",tags:["状态显示","报警","运行监控"]}
-];
-
-const structures=[
-  {name:"金属外壳",icon:"🏠",color:"#64748b",desc:"保护内部精密部件，隔绝灰尘和干扰，同时提供安全防护"},
-  {name:"机架",icon:"🏗️",color:"#475569",desc:"整机的骨架，承载所有运动部件，确保高速运动时的稳定性"},
-  {name:"XY 轴",icon:"📐",color:"#3b82f6",desc:"贴装头的运动平台，实现精确定位"},
-  {name:"工作头",icon:"🤖",color:"#f59e0b",desc:"核心执行部件，搭载吸嘴组件"},
-  {name:"送板结构",icon:"📋",color:"#10b981",desc:"负责PCB板的输入和输出"},
-  {name:"送料系统",icon:"📦",color:"#8b5cf6",desc:"供料器的安装平台"}
-];
-
-const components=[
-  {name:"电阻",prefix:"R",img:"components/resistor.jpg",desc:"两端白色锡点，中间黑色本体",detail:"电阻用于限制电流，就像水龙头控制水流大小。丝印以R开头，如R67表示第67号电阻"},
-  {name:"贴片电容",prefix:"C",img:"components/capacitor.jpg",desc:"两端白色锡点，中间土黄色",detail:"电容用于储存电荷，就像蓄水池储存水。丝印以C开头，如C8C"},
-  {name:"二极管",prefix:"D",img:"components/diode.jpg",desc:"有方向性，一端有标记",detail:"二极管只能让电流单向流动，就像单向阀门。丝印以D开头，如D6"},
-  {name:"稳压二极管",prefix:"ZD",img:"components/zener.jpg",desc:"用于稳定电压，保护后级电路",detail:"稳压管可以将电压稳定在特定值，就像稳压器保持水压稳定。丝印以ZD开头"},
-  {name:"三极管",prefix:"Q",img:"components/transistor.jpg",desc:"有三个引脚，用于放大和开关",detail:"三极管可以放大信号，就像喇叭放大声音。丝印以Q开头，如Q7、Q8"},
-  {name:"电感",prefix:"L",img:"components/inductor.jpg",desc:"通常是黑色或灰色圆柱体",detail:"电感用于滤波和储能，就像筛子过滤杂质。丝印以L开头，如L25"},
-  {name:"磁珠",prefix:"FB",img:"components/ferrite.jpg",desc:"用于抑制高频噪声",detail:"磁珠用于抑制高频噪声，就像消音器。丝印以FB开头，如FB6"},
-  {name:"热敏电阻",prefix:"RT",img:"components/thermistor.jpg",desc:"对温度敏感，阻值随温度变化",detail:"热敏电阻用于温度检测和保护。丝印以RT开头"}
-];
-
-const brands=[
-{name:"Panasonic",country:"日本",color:"#059669",position:"综合均衡型行业标杆",speed:"8万~12万",precision:"±25~30μm",features:["稳定性强","良率高","软硬件均衡","适合复杂产品"],scenes:["汽车电子","工业控制","消费电子中大型产线"]},
-{name:"Yamaha",country:"日本",color:"#7c3aed",position:"高性价比 + 易用性代表",speed:"7万~11万",precision:"±25~35μm",features:["换线快","操作简单","维护成本低","对人员依赖低"],scenes:["中小EMS","多品种中等规模","快速换线工厂"]},
-{name:"ASMPT",country:"新加坡",color:"#dc2626",position:"超高速 + 高端智能化标杆",speed:"10万~20万+",precision:"±20~25μm",features:["极致速度","路径优化","设备联网","数据能力领先"],scenes:["手机主板","服务器","AI硬件","大规模量产"]},
-{name:"Fuji",country:"日本",color:"#2563eb",position:"高柔性模块化专家",speed:"7万~13万",precision:"±25μm左右",features:["模块化设计","可拼产线","多品种适配","混线生产"],scenes:["EMS代工厂","多品种小批量","汽车电子"]}
-];
-
-const problems=[
-  {title:"精度与速度的矛盾",desc:"高速贴装难以保证高精度，需要权衡取舍",tag:"核心矛盾"},
-  {title:"换线时间过长",desc:"多品种生产时，频繁换线影响效率",tag:"效率损失"},
-  {title:"维护成本高昂",desc:"核心部件依赖进口，维修费用高",tag:"成本压力"},
-  {title:"编程调试复杂",desc:"新产品导入需要专业工程师",tag:"人力依赖"},
-  {title:"国产替代难度大",desc:"高端市场仍被国外品牌垄断",tag:"市场格局"}
-];
-
-function resizeCanvas(c,w,h){const d=window.devicePixelRatio||1;c.width=w*d;c.height=h*d;c.style.width=w+'px';c.style.height=h+'px';const x=c.getContext('2d');x.scale(d,d);return x;}
-function roundRect(x,rx,ry,rw,rh,r){x.beginPath();x.moveTo(rx+r,ry);x.lineTo(rx+rw-r,ry);x.quadraticCurveTo(rx+rw,ry,rx+rw,ry+r);x.lineTo(rx+rw,ry+rh-r);x.quadraticCurveTo(rx+rw,ry+rh,rx+rw-r,ry+rh);x.lineTo(rx+r,ry+rh);x.quadraticCurveTo(rx,ry+rh,rx,ry+rh-r);x.lineTo(rx,ry+r);x.quadraticCurveTo(rx,ry,rx+r,ry);x.closePath();}
-
-const nav=document.getElementById('nav'),navProgress=document.getElementById('navProgress'),sections=document.querySelectorAll('section');
-window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50);navProgress.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%';});
-const navLinks=document.querySelectorAll('.nav-links a');
-const navObserver=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)navLinks.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+en.target.id));});},{threshold:0.3});
-sections.forEach(s=>navObserver.observe(s));
-const fadeObserver=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)en.target.classList.add('visible');});},{threshold:0.15});
-document.querySelectorAll('.fade-in').forEach(el=>fadeObserver.observe(el));
-
-// SMT Line Animation
-(function(){
-  const canvas=document.getElementById('lineCanvas'),wrap=canvas.parentElement;
-  let w,h,ctx,phase=0;
-  const machines=[{label:'印刷机',color:'#0ea5e9',icon:'🖨️',desc:'印锡膏'},{label:'SPI检测',color:'#8b5cf6',icon:'🔬',desc:'检测锡膏'},{label:'贴片机',color:'#f59e0b',icon:'🤖',desc:'贴元件'},{label:'回流焊',color:'#ef4444',icon:'🔥',desc:'焊接'},{label:'AOI检测',color:'#10b981',icon:'🔍',desc:'终检'}];
-  let boards=[];
-  function resize(){w=wrap.clientWidth;h=wrap.clientHeight;ctx=resizeCanvas(canvas,w,h);boards=[];for(let i=0;i<4;i++)boards.push({x:-150-i*300,speed:0.8+Math.random()*0.3,state:0});}
-  function drawBoard(b){const x=b.x,y=h*0.62;ctx.save();ctx.fillStyle='#0ea5e9';ctx.shadowColor='rgba(14,165,233,0.3)';ctx.shadowBlur=8;roundRect(ctx,x-25,y-15,50,30,4);ctx.fill();ctx.shadowBlur=0;if(b.state>=1){ctx.fillStyle='#94a3b8';for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(x-15+i*6,y-5,2,0,Math.PI*2);ctx.fill();}}if(b.state>=2){ctx.fillStyle='#10b981';for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(x-15+i*6,y-5,2,0,Math.PI*2);ctx.fill();}}if(b.state>=3){const cc=['#f59e0b','#ef4444','#8b5cf6','#10b981'];for(let i=0;i<4;i++){ctx.fillStyle=cc[i];ctx.fillRect(x-18+i*10,y+2,7,5);}}if(b.state>=4){ctx.fillStyle='#fbbf24';for(let i=0;i<4;i++)ctx.fillRect(x-18+i*10,y+2,7,5);}if(b.state>=5){ctx.fillStyle='#10b981';ctx.beginPath();ctx.arc(x+20,y-15,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('✓',x+20,y-12);}ctx.fillStyle='#fff';ctx.font='8px sans-serif';ctx.textAlign='center';ctx.fillText('PCB',x,y+3);ctx.restore();}
-  function draw(){ctx.clearRect(0,0,w,h);phase+=0.02*animationSpeed;const cy=h*0.62;ctx.strokeStyle='#cbd5e1';ctx.lineWidth=4;ctx.setLineDash([10,8]);ctx.lineDashOffset=-phase*4;ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(w,cy);ctx.stroke();ctx.setLineDash([]);const gap=w/machines.length,mw=gap*0.45,mh=h*0.35;machines.forEach((m,i)=>{const mx=gap*i+gap*0.5,my=h*0.32;ctx.fillStyle=m.color+'12';ctx.strokeStyle=m.color;ctx.lineWidth=2;roundRect(ctx,mx-mw/2,my-mh/2,mw,mh,8);ctx.fill();ctx.stroke();ctx.font='22px sans-serif';ctx.textAlign='center';ctx.fillText(m.icon,mx,my-8);ctx.fillStyle='#1e293b';ctx.font='bold 11px sans-serif';ctx.fillText(m.label,mx,my+18);ctx.fillStyle=m.color;ctx.font='10px sans-serif';ctx.fillText(m.desc,mx,my+32);});boards.forEach(b=>{b.x+=b.speed*animationSpeed;machines.forEach((m,i)=>{const mx2=gap*i+gap*0.5;if(b.x>mx2-20&&b.x<mx2+20&&b.state===i)b.state=i+1;});if(b.x>w+80){b.x=-80;b.state=0;}drawBoard(b);});requestAnimationFrame(draw);}
-  resize();draw();window.addEventListener('resize',resize);
-})();
-
-// 基础知识
-(function(){
-  const grid=document.getElementById('basicsGrid');
-  basics.forEach(b=>{
-    const card=document.createElement('div');card.className='basics-card';
-    card.innerHTML=`
-      <div class="img-wrap" ${b.img ? `onclick="openLightbox('${b.img}')"` : ''}>
-        ${b.img ? `<img src="${b.img}" alt="${b.name}" onerror="this.parentElement.innerHTML='<div style=\'height:100%;display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:#94a3b8;font-size:13px;\'>待补充图片</div>'">` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:#94a3b8;font-size:13px;">待补充图片</div>'}
-      </div>
-      <div class="header">
-        <div class="title">${b.name}</div>
-        <div class="subtitle">${b.subtitle}</div>
-      </div>
-      <div class="desc">${b.desc}</div>
-      <div class="tags">${b.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-      <div class="detail">${b.detail}</div>
-    `;
-    card.addEventListener('click',()=>{
-      card.classList.toggle('active');
-    });
-    grid.appendChild(card);
+// Fade in on scroll
+const fadeEls = document.querySelectorAll('.fade-in');
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
   });
-})();
+}, { threshold: 0.15 });
+fadeEls.forEach(el => fadeObserver.observe(el));
 
-// 贴片机结构
-(function(){
-  const canvas=document.getElementById('structureCanvas'),wrap=canvas.parentElement;
-  let w,h,ctx,phase=0,activePart=-1;
-  const parts=[
-    {name:"金属外壳",x:0.5,y:0.15,w:0.9,h:0.15,color:"#64748b"},
-    {name:"机架",x:0.5,y:0.35,w:0.85,h:0.12,color:"#475569"},
-    {name:"XY 轴",x:0.5,y:0.5,w:0.7,h:0.1,color:"#3b82f6"},
-    {name:"工作头",x:0.5,y:0.65,w:0.3,h:0.12,color:"#f59e0b"},
-    {name:"送板结构",x:0.5,y:0.82,w:0.8,h:0.08,color:"#10b981"},
-    {name:"送料系统",x:0.85,y:0.65,w:0.12,h:0.2,color:"#8b5cf6"}
-  ];
-  const list=document.getElementById('structureList');
-  structures.forEach((s,i)=>{
-    const item=document.createElement('div');item.className='structure-item';
-    item.innerHTML=`<div class="header"><div class="icon" style="background:${s.color}20;color:${s.color}">${s.icon}</div><div class="title">${s.name}</div></div><div class="desc">${s.desc}</div>`;
-    item.addEventListener('click',()=>{document.querySelectorAll('.structure-item').forEach(c=>c.classList.remove('active'));item.classList.add('active');activePart=i;});
-    list.appendChild(item);
-  });
-  function resize(){w=wrap.clientWidth;h=400;ctx=resizeCanvas(canvas,w,h);}
-  function draw(){
-    ctx.clearRect(0,0,w,h);phase+=0.02*animationSpeed;
-    
-    // 标题
-    ctx.fillStyle='#64748b';ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillText('贴片机结构示意图',15,25);
-    
-    const machineX=w*0.1,machineY=h*0.08,machineW=w*0.8,machineH=h*0.85;
-    
-    // 金属外壳 (最外层)
-    ctx.fillStyle=activePart===0?'#64748b':'#94a3b8';
-    ctx.strokeStyle=activePart===0?'#475569':'#64748b';
-    ctx.lineWidth=activePart===0?3:2;
-    roundRect(ctx,machineX,machineY,machineW,machineH,12);
-    ctx.fill();ctx.stroke();
-    ctx.fillStyle=activePart===0?'#fff':'#fff';
-    ctx.font='bold 13px sans-serif';ctx.textAlign='center';
-    ctx.fillText('金属外壳',machineX+machineW/2,machineY+20);
-    
-    // 机架 (第二层)
-    const frameX=machineX+20,frameY=machineY+40,frameW=machineW-40,frameH=machineH-60;
-    ctx.fillStyle=activePart===1?'#475569':'#64748b';
-    ctx.strokeStyle=activePart===1?'#334155':'#475569';
-    ctx.lineWidth=activePart===1?3:2;
-    roundRect(ctx,frameX,frameY,frameW,frameH,8);
-    ctx.fill();ctx.stroke();
-    ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';
-    ctx.fillText('机架',frameX+30,frameY+18);
-    
-    // XY轴 (中间区域)
-    const xyX=frameX+40,xyY=frameY+50,xyW=frameW*0.6,xyH=frameH*0.3;
-    ctx.fillStyle=activePart===2?'#3b82f6':'#60a5fa';
-    ctx.strokeStyle=activePart===2?'#2563eb':'#3b82f6';
-    ctx.lineWidth=activePart===2?3:2;
-    roundRect(ctx,xyX,xyY,xyW,xyH,6);
-    ctx.fill();ctx.stroke();
-    ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';
-    ctx.fillText('XY 轴',xyX+xyW/2,xyY+xyH/2+4);
-    
-    // X轴箭头
-    ctx.strokeStyle='#fff';ctx.lineWidth=2;
-    ctx.beginPath();ctx.moveTo(xyX+10,xyY+xyH-15);ctx.lineTo(xyX+xyW-10,xyY+xyH-15);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(xyX+xyW-15,xyY+xyH-20);ctx.lineTo(xyX+xyW-10,xyY+xyH-15);ctx.lineTo(xyX+xyW-15,xyY+xyH-10);ctx.fill();
-    ctx.fillStyle='#fff';ctx.font='10px sans-serif';ctx.fillText('X',xyX+xyW/2,xyY+xyH-10);
-    
-    // Y轴箭头
-    ctx.beginPath();ctx.moveTo(xyX+15,xyY+10);ctx.lineTo(xyX+15,xyY+xyH-20);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(xyX+10,xyY+15);ctx.lineTo(xyX+15,xyY+10);ctx.lineTo(xyX+20,xyY+15);ctx.fill();
-    ctx.fillText('Y',xyX+10,xyY+25);
-    
-    // 工作头 (贴装头)
-    const headX=xyX+xyW/2-30,headY=xyY+xyH+15,headW=60,headH=40;
-    ctx.fillStyle=activePart===3?'#f59e0b':'#fbbf24';
-    ctx.strokeStyle=activePart===3?'#d97706':'#f59e0b';
-    ctx.lineWidth=activePart===3?3:2;
-    roundRect(ctx,headX,headY,headW,headH,6);
-    ctx.fill();ctx.stroke();
-    ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';
-    ctx.fillText('工作头',headX+headW/2,headY+headH/2+4);
-    
-    // 吸嘴 (工作头下方)
-    for(let i=0;i<4;i++){
-      const nx=headX+10+i*12;
-      ctx.fillStyle='#94a3b8';ctx.fillRect(nx,headY+headH,4,12);
-      ctx.beginPath();ctx.arc(nx+2,headY+headH+15,3,0,Math.PI*2);ctx.fill();
+// ====================== Hero Background ======================
+(function initHeroBg() {
+  const canvas = document.getElementById('heroCanvas');
+  const wrap = canvas.parentElement;
+  let w,h,ctx;
+  const particles = [];
+  const colors = ['rgba(8,145,178,0.3)','rgba(245,158,11,0.2)','rgba(16,185,129,0.2)'];
+
+  function resize() {
+    w = wrap.clientWidth; h = wrap.clientHeight;
+    ctx = resizeCanvas(canvas, w, h);
+  }
+
+  function initParticles() {
+    particles.length = 0;
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 2.5 + 0.5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: Math.random() * 0.5 + 0.1,
+      });
     }
-    
-    // 送料系统 (右侧)
-    const feederX=frameX+frameW-80,feederY=frameY+80,feederW=50,feederH=frameH-120;
-    ctx.fillStyle=activePart===4?'#8b5cf6':'#a78bfa';
-    ctx.strokeStyle=activePart===4?'#7c3aed':'#8b5cf6';
-    ctx.lineWidth=activePart===4?3:2;
-    roundRect(ctx,feederX,feederY,feederW,feederH,6);
-    ctx.fill();ctx.stroke();
-    ctx.save();ctx.translate(feederX+feederW/2,feederY+feederH/2);ctx.rotate(-Math.PI/2);
-    ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-    ctx.fillText('送料系统',0,4);ctx.restore();
-    
-    // 料带 (送料系统上)
-    ctx.fillStyle='#f59e0b';
-    for(let i=0;i<5;i++){
-      ctx.fillRect(feederX+5,feederY+20+i*15,feederW-10,8);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    for (const p of particles) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
     }
-    
-    // 送板结构 (底部)
-    const boardX=frameX+20,boardY=frameY+frameH-40,boardW=frameW-100,boardH=25;
-    ctx.fillStyle=activePart===5?'#10b981':'#34d399';
-    ctx.strokeStyle=activePart===5?'#059669':'#10b981';
-    ctx.lineWidth=activePart===5?3:2;
-    roundRect(ctx,boardX,boardY,boardW,boardH,6);
-    ctx.fill();ctx.stroke();
-    ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-    ctx.fillText('送板结构（轨道）',boardX+boardW/2,boardY+boardH/2+4);
-    
-    // PCB板
-    ctx.fillStyle='#0ea5e9';ctx.fillRect(boardX+20,boardY+5,40,15);
-    ctx.fillStyle='#fff';ctx.font='8px sans-serif';ctx.fillText('PCB',boardX+40,boardY+14);
-    
-    // 连接线
-    ctx.strokeStyle='#94a3b8';ctx.lineWidth=1;ctx.setLineDash([4,4]);
-    // XY轴到工作头
-    ctx.beginPath();ctx.moveTo(headX+headW/2,xyY+xyH);ctx.lineTo(headX+headW/2,headY);ctx.stroke();
-    // 送料系统到工作头
-    ctx.beginPath();ctx.moveTo(feederX,feederY+feederH/2);ctx.lineTo(headX+headW,headY+headH/2);ctx.stroke();
-    ctx.setLineDash([]);
-    
+    // Draw connections
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i+1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
     requestAnimationFrame(draw);
   }
-  resize();draw();window.addEventListener('resize',resize);
+
+  resize();
+  initParticles();
+  draw();
+  window.addEventListener('resize', () => { resize(); initParticles(); });
 })();
 
-// Work Principle Animation
-(function(){
-  const canvas=document.getElementById('insideCanvas'),wrap=canvas.parentElement;
-  let w,h,ctx,phase=0,currentStep=0;
-  const indicators=document.getElementById('stepIndicators'),stepLabel=document.getElementById('stepLabel'),stepNum=document.getElementById('stepNum'),stepTitle=document.getElementById('stepTitle'),stepText=document.getElementById('stepText'),prevBtn=document.getElementById('stepPrev'),nextBtn=document.getElementById('stepNext');
-  steps.forEach((_,i)=>{const d=document.createElement('div');d.className='step-ind'+(i===0?' active':'');indicators.appendChild(d);});
-  function updateStep(s){currentStep=s;document.querySelectorAll('.step-ind').forEach((d,i)=>d.classList.toggle('active',i===s));stepLabel.textContent=`${s+1} / ${steps.length}`;stepNum.textContent=s+1;stepTitle.textContent=steps[s].title;stepText.textContent=steps[s].desc;prevBtn.disabled=s===0;nextBtn.disabled=s===steps.length-1;}
-  prevBtn.addEventListener('click',()=>{if(currentStep>0)updateStep(currentStep-1);});
-  nextBtn.addEventListener('click',()=>{if(currentStep<steps.length-1)updateStep(currentStep+1);});
-  function resize(){w=wrap.clientWidth;h=420;ctx=resizeCanvas(canvas,w,h);}
-  function drawLabel(x,y,text,color,arrowDir){
-    ctx.font='bold 12px -apple-system,"PingFang SC",sans-serif';
-    const tw=ctx.measureText(text).width;const padX=12,boxW=tw+padX*2,boxH=26;let labelY=y;
-    if(arrowDir==='down')labelY=y-15;
-    ctx.fillStyle='rgba(0,0,0,0.15)';roundRect(ctx,x-boxW/2+2,labelY-boxH/2+2,boxW,boxH,6);ctx.fill();
-    ctx.fillStyle=color;roundRect(ctx,x-boxW/2,labelY-boxH/2,boxW,boxH,6);ctx.fill();
-    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,x,labelY);ctx.textBaseline='alphabetic';
-    ctx.fillStyle=color;ctx.beginPath();if(arrowDir==='down'){ctx.moveTo(x-6,labelY+boxH/2+2);ctx.lineTo(x+6,labelY+boxH/2+2);ctx.lineTo(x,labelY+boxH/2+10);}ctx.closePath();ctx.fill();
+// ====================== SMT Line Animation ======================
+(function initLine() {
+  const canvas = document.getElementById('lineCanvas');
+  const wrap = canvas.parentElement;
+  let w,h,ctx,dpr;
+  let phase = 0;
+  const machines = [
+    { x: 0, label: '印刷机', color: '#0891b2', icon: '🖨️' },
+    { x: 0, label: 'SPI检测', color: '#8b5cf6', icon: '🔬' },
+    { x: 0, label: '贴片机', color: '#f59e0b', icon: '🤖' },
+    { x: 0, label: '回流焊', color: '#ef4444', icon: '🔥' },
+    { x: 0, label: 'AOI检测', color: '#10b981', icon: '🔍' },
+  ];
+
+  function resize() {
+    w = wrap.clientWidth; h = wrap.clientHeight;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    // Position machines
+    const gap = w / machines.length;
+    machines.forEach((m, i) => { m.x = gap * i + gap * 0.5; m.baseX = m.x; });
   }
-  function drawTarget(x,y,radius,color){
-    const pulse=Math.sin(phase*3)*0.3+0.7;ctx.strokeStyle=color;ctx.lineWidth=3;ctx.globalAlpha=pulse;
-    ctx.beginPath();ctx.arc(x,y,radius+Math.sin(phase*3)*4,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
-    ctx.fillStyle=color+'20';ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
+
+  function drawBoard(px, py, w2, h2, angle) {
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(angle);
+    ctx.fillStyle = '#0d9488';
+    ctx.shadowColor = 'rgba(13,148,136,0.3)';
+    ctx.shadowBlur = 4;
+    ctx.fillRect(-w2/2, -h2/2, w2, h2);
+    ctx.shadowBlur = 0;
+    // Small components
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-w2/2 + 4 + i*10, -2, 5, 4);
+    }
+    ctx.fillStyle = '#fff';
+    ctx.font = '6px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PCB', 0, 2);
+    ctx.restore();
   }
-  function drawMachine(){
-    ctx.fillStyle='#f8fafc';roundRect(ctx,0,0,w,h,16);ctx.fill();
-    ctx.fillStyle='#fff';ctx.strokeStyle='#e2e8f0';ctx.lineWidth=2;roundRect(ctx,w*0.03,h*0.03,w*0.94,h*0.94,12);ctx.fill();ctx.stroke();
-    ctx.fillStyle='#94a3b8';ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillText('贴片机内部',w*0.05,h*0.08);
-    ctx.strokeStyle='#cbd5e1';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(w*0.02,h*0.78);ctx.lineTo(w*0.98,h*0.78);ctx.stroke();
-    ctx.strokeStyle='#94a3b8';ctx.lineWidth=2;ctx.setLineDash([4,8]);ctx.lineDashOffset=-phase*5*animationSpeed;ctx.beginPath();ctx.moveTo(w*0.02,h*0.78);ctx.lineTo(w*0.98,h*0.78);ctx.stroke();ctx.setLineDash([]);
-    const feederX=w*0.15,feederY=h*0.5;ctx.fillStyle=currentStep===1?'#0ea5e9':'#e2e8f0';roundRect(ctx,feederX-40,feederY-50,80,100,8);ctx.fill();
-    ctx.fillStyle=currentStep===1?'#fff':'#64748b';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('供料器',feederX,feederY+5);
-    ctx.fillStyle='#f59e0b';for(let i=0;i<5;i++)ctx.fillRect(feederX-28+i*14,feederY-35,10,8);
-    const headX=w*0.5,headBaseY=h*0.22,headMoveY=(currentStep===2||currentStep===4)?80:0,headMoveX=(currentStep===2)?-100:0;
-    const headY=headBaseY+headMoveY,headFinalX=headX+headMoveX;
-    ctx.fillStyle=(currentStep===2||currentStep===4)?'#3b82f6':'#64748b';roundRect(ctx,headFinalX-60,headY-20,120,40,8);ctx.fill();
-    ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('贴装头',headFinalX,headY+4);
-    for(let i=0;i<4;i++){const nx=headFinalX-35+i*23;ctx.fillStyle='#94a3b8';ctx.fillRect(nx-4,headY+20,8,30);ctx.fillStyle=currentStep===2?'#f59e0b':'#64748b';ctx.beginPath();ctx.arc(nx,headY+54,6,0,Math.PI*2);ctx.fill();if(currentStep>=2&&currentStep<=4){ctx.fillStyle='#f59e0b';ctx.fillRect(nx-5,headY+58,10,5);}}
-    const camX=w*0.78,camY=h*0.38;ctx.fillStyle=currentStep===3?'#8b5cf6':'#e2e8f0';ctx.beginPath();ctx.arc(camX,camY,30,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=currentStep===3?'#fff':'#64748b';ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText('📷',camX,camY+7);
-    ctx.fillStyle=currentStep===3?'#8b5cf6':'#94a3b8';ctx.font='bold 10px sans-serif';ctx.fillText('视觉相机',camX,camY+48);
-    const pcbX=w*0.5,pcbY=h*0.78;ctx.fillStyle='#0ea5e9';roundRect(ctx,pcbX-35,pcbY-12,70,24,4);ctx.fill();
-    ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('PCB',pcbX,pcbY+3);
-    if(currentStep>=4){const cc=['#f59e0b','#ef4444','#8b5cf6','#10b981'];for(let i=0;i<4;i++){ctx.fillStyle=cc[i];ctx.fillRect(pcbX-20+i*12,pcbY-8,8,5);}}
-    if(currentStep===0){drawTarget(pcbX,pcbY,40,'#0ea5e9');drawLabel(pcbX,h*0.12,'第1步：PCB从左侧进入','#0ea5e9','down');}
-    else if(currentStep===1){drawTarget(feederX,feederY,55,'#0ea5e9');drawLabel(feederX,h*0.12,'第2步：供料器推进元件','#0ea5e9','down');}
-    else if(currentStep===2){drawTarget(headFinalX,headY+40,45,'#f59e0b');drawLabel(headFinalX,h*0.08,'第3步：吸嘴下降取料','#f59e0b','down');}
-    else if(currentStep===3){drawTarget(camX,camY,35,'#8b5cf6');drawLabel(camX,h*0.08,'第4步：相机拍照对中','#8b5cf6','down');ctx.strokeStyle='rgba(139,92,246,0.6)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(camX,camY+30);ctx.lineTo(headFinalX,headY+55);ctx.stroke();ctx.setLineDash([]);}
-    else if(currentStep===4){drawTarget(pcbX,pcbY,40,'#10b981');drawLabel(pcbX,h*0.12,'第5步：元件贴装到PCB','#10b981','down');}
-    else if(currentStep===5){ctx.fillStyle='#10b981';ctx.font='bold 48px sans-serif';ctx.textAlign='center';ctx.fillText('✓',w*0.5,h*0.55);drawLabel(w*0.5,h*0.08,'第6步：质量检测完成','#10b981','down');}
+
+  function drawConveyorBelt(cx, y, width) {
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 6]);
+    ctx.lineDashOffset = -phase * 2;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // rollers
+    for (let x = 0; x < width; x += 40) {
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#475569';
+      ctx.fill();
+    }
   }
-  function draw(){ctx.clearRect(0,0,w,h);phase+=0.02*animationSpeed;drawMachine();requestAnimationFrame(draw);}
-  resize();draw();window.addEventListener('resize',resize);
+
+  function drawArrow(x1, y1, x2, y2) {
+    const midx = (x1 + x2) / 2;
+    const midy = (y1 + y2) / 2;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const pulse = 0.5 + 0.5 * Math.sin(phase * 3);
+
+    ctx.save();
+    ctx.translate(midx, midy);
+    ctx.rotate(angle);
+    ctx.fillStyle = `rgba(148,163,184,${0.3 + pulse*0.4})`;
+    ctx.beginPath();
+    ctx.moveTo(12, 0);
+    ctx.lineTo(0, -6);
+    ctx.lineTo(0, 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  let boards = [];
+  for (let i = 0; i < 3; i++) {
+    boards.push({ x: -100 - i * 200, y: 0, speed: 1.2 + Math.random() * 0.3, angle: Math.random() * 0.02 - 0.01 });
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    const cy = h * 0.58;
+    phase += 0.02;
+
+    // Background grid
+    ctx.strokeStyle = 'rgba(0,0,0,0.03)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += 30) {
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+    }
+    for (let y = 0; y < h; y += 30) {
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+    }
+
+    // Conveyor belt line
+    drawConveyorBelt(cy, cy, w);
+
+    // Draw machines
+    const machineW = w / machines.length * 0.55;
+    const machineH = h * 0.45;
+
+    for (let i = 0; i < machines.length; i++) {
+      const m = machines[i];
+      const mx = m.x;
+      const my = h * 0.38;
+
+      // Machine body
+      ctx.fillStyle = m.color + '18';
+      ctx.strokeStyle = m.color;
+      ctx.lineWidth = 2;
+      roundRect(ctx, mx - machineW/2, my - machineH/2, machineW, machineH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Machine icon
+      ctx.font = '24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(m.icon, mx, my - 6);
+
+      // Label
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 13px -apple-system,"PingFang SC",sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(m.label, mx, my + 30);
+
+      // Arrow after machine (except last)
+      if (i < machines.length - 1) {
+        drawArrow(mx + machineW/2, cy, machines[i+1].x - machineW/2, cy);
+      }
+    }
+
+    // Draw moving PCBs
+    for (const b of boards) {
+      b.x += b.speed;
+      b.y = cy + Math.sin(phase * 2 + b.x * 0.01) * 1.5;
+      if (b.x > w + 60) b.x = -80;
+      const bw = 36, bh = 20;
+      drawBoard(b.x, b.y, bw, bh, b.angle);
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
+  resize();
+  draw();
+  window.addEventListener('resize', resize);
 })();
 
-// Components
-(function(){
-  const grid=document.getElementById('componentsGrid');
-  components.forEach(comp=>{
-    const item=document.createElement('div');item.className='component-item';
-    item.innerHTML=`<div class="img-wrap"><img src="${comp.img}" alt="${comp.name}"></div><div class="info"><span class="prefix">${comp.prefix}</span><span class="label">${comp.name}</span><p class="desc">${comp.desc}</p></div><div class="detail"><p><strong>功能说明：</strong>${comp.detail}</p></div>`;
-    item.addEventListener('click',()=>{const wasActive=item.classList.contains('active');document.querySelectorAll('.component-item').forEach(c=>c.classList.remove('active'));if(!wasActive)item.classList.add('active');});
-    grid.appendChild(item);
+// ====================== Inside Machine (6-step cycle) ======================
+(function initInside() {
+  const canvas = document.getElementById('insideCanvas');
+  const wrap = canvas.parentElement;
+  let w,h,ctx,dpr;
+  let animStep = 0; // 0..5
+  let animPhase = 0;
+  let isAnimating = false;
+
+  const steps = [
+    { label: '1 / 6', desc: 'PCB 经传送带进入设备，到达预定工位后由夹紧机构固定' },
+    { label: '2 / 6', desc: '飞达（Feeder）将载有元件的编带向前推送一个步距，供吸嘴拾取' },
+    { label: '3 / 6', desc: '贴装头移动至飞达取料位，真空吸嘴下降拾取元件' },
+    { label: '4 / 6', desc: '吸嘴头移至相机工位，系统对元件进行拍照并对角度/位置偏差进行实时计算' },
+    { label: '5 / 6', desc: '吸嘴头移至 PCB 上方，依据偏差补偿数据精准对位，完成贴装动作' },
+    { label: '6 / 6', desc: '贴装头返回初始位置，进入下一循环。单块 PCB 通常需贴装数百至数千颗元件' },
+  ];
+
+  const stepDesc = document.getElementById('insideDesc');
+  const stepLabel = document.getElementById('stepLabel');
+  const stepPrev = document.getElementById('stepPrev');
+  const stepNext = document.getElementById('stepNext');
+  const indicators = document.getElementById('stepIndicators');
+
+  function buildIndicators() {
+    indicators.innerHTML = '';
+    for (let i = 0; i < 6; i++) {
+      const div = document.createElement('div');
+      div.className = 'step-ind' + (i === 0 ? ' active' : '');
+      indicators.appendChild(div);
+    }
+  }
+  buildIndicators();
+
+  function updateStep() {
+    const inds = indicators.querySelectorAll('.step-ind');
+    inds.forEach((el, i) => {
+      el.className = 'step-ind';
+      if (i < animStep) el.classList.add('done');
+      else if (i === animStep) el.classList.add('active');
+    });
+    stepLabel.textContent = steps[animStep].label;
+    stepDesc.textContent = steps[animStep].desc;
+    stepPrev.disabled = animStep === 0;
+    stepNext.disabled = animStep === 5;
+    animPhase = 0;
+  }
+
+  function resize() {
+    w = wrap.clientWidth; h = wrap.clientHeight;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    const cx = w * 0.5, cy = h * 0.5;
+    const sc = Math.min(w, h) / 400;
+
+    animPhase += 0.02;
+    const t = Math.min(1, animPhase);
+
+    // ---- Machine frame ----
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(20, 20, w-40, h-40);
+
+    // Gantry rail (top)
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(40, 30, w-80, 6);
+    // XY gantry label
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('XY 龙门架', w/2, 24);
+
+    // ---- Conveyor belt (bottom) ----
+    const beltY = h - 60;
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(30, beltY, w-60, 4);
+    ctx.fillRect(30, beltY + 20, w-60, 4);
+    // Rollers
+    for (let rx = 40; rx < w-40; rx += 50) {
+      ctx.beginPath();
+      ctx.arc(rx, beltY+12, 8, 0, Math.PI*2);
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.arc(rx, beltY+12, 3, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // ---- PCB ----
+    const pcbW = w * 0.32, pcbH = h * 0.18;
+    let pcbX, pcbY = beltY - pcbH - 8;
+
+    if (animStep === 0) {
+      // PCB entering from right
+      pcbX = w - 30 - pcbW + (1 - t) * (w * 0.25);
+    } else {
+      pcbX = w/2 - pcbW/2; // centered
+    }
+
+    // PCB highlight glow when step 5 (placing)
+    if (animStep === 4 || animStep === 5) {
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 12;
+    }
+    ctx.fillStyle = '#0d9488';
+    ctx.fillRect(pcbX, pcbY, pcbW, pcbH);
+    ctx.shadowBlur = 0;
+    // PCB pads
+    for (let px = pcbX + 10; px < pcbX + pcbW - 10; px += 25) {
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(px, pcbY + 8, 8, 4);
+      ctx.fillRect(px, pcbY + pcbH - 12, 8, 4);
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PCB', pcbX + pcbW/2, pcbY + pcbH/2 + 3);
+
+    // ---- Feeder (left) ----
+    const feederX = 50, feederW = 50, feederH = h * 0.25;
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(feederX, beltY - feederH - 10, feederW, feederH);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(feederX + 5, beltY - feederH - 5, 40, feederH - 10);
+    // Tape pockets
+    for (let ty = 0; ty < 5; ty++) {
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(feederX + 25, beltY - feederH - 5 + 10 + ty * 12, 3, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('飞达', feederX + feederW/2, beltY - feederH/2 - 8);
+
+    // Take-up reel (right)
+    const reelX = w - 60;
+    ctx.beginPath();
+    ctx.arc(reelX, beltY - 30, 18, 0, Math.PI*2);
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#475569';
+    ctx.beginPath();
+    ctx.arc(reelX, beltY - 30, 8, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '9px sans-serif';
+    ctx.fillText('收卷', reelX, beltY - 50);
+
+    // ---- Nozzle head ----
+    const headW = 50, headH = 30;
+    let headX, headY;
+
+    if (animStep === 0) {
+      headX = w/2; headY = 50; // resting
+    } else if (animStep === 1) {
+      headX = w/2; headY = 50;
+    } else if (animStep === 2) {
+      // Move to feeder
+      const startX = w/2, endX = feederX + feederW/2;
+      headX = startX + (endX - startX) * easeInOut(t);
+      headY = 50 + (1 - Math.sin(t * Math.PI)) * 30;
+    } else if (animStep === 3) {
+      // Move to camera (center-ish)
+      const camX = w * 0.42;
+      const startX = feederX + feederW/2;
+      headX = startX + (camX - startX) * easeInOut(t);
+      headY = 50 + (1 - Math.sin(t * Math.PI)) * 30;
+    } else if (animStep === 4) {
+      // Move to PCB center
+      const camX = w * 0.42;
+      const placedX = pcbX + pcbW/2;
+      headX = camX + (placedX - camX) * easeInOut(t);
+      headY = 50 + (1 - Math.sin(t * Math.PI)) * 40;
+    } else {
+      // Return to start
+      const placedX = pcbX + pcbW/2;
+      headX = placedX + (w/2 - placedX) * easeInOut(t);
+      headY = 50 + (1 - Math.sin(t * Math.PI)) * 20;
+    }
+
+    // Camera
+    if (animStep === 3) {
+      ctx.fillStyle = '#f59e0b';
+      ctx.globalAlpha = 0.3 + 0.3 * Math.sin(animPhase * 8);
+      ctx.fillRect(w*0.40, 52, 20, 20);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('📷', w*0.42, 68);
+    }
+
+    // Draw nozzle head
+    ctx.fillStyle = '#0891b2';
+    roundRect2(ctx, headX - headW/2, headY, headW, headH, 4);
+    ctx.fill();
+
+    // Nozzle tip
+    if (animStep >= 2) {
+      ctx.fillStyle = '#0e7490';
+      const tipLen = (animStep === 2 || animStep === 3 || animStep === 4) ? 12 + 6 * Math.sin(animPhase * 6) : 10;
+      ctx.fillRect(headX - 3, headY + headH, 6, tipLen);
+      // Component being held
+      if (animStep >= 2 && animStep <= 4) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(headX - 5, headY + headH + tipLen - 4, 10, 6);
+      }
+    }
+
+    // Head label
+    ctx.fillStyle = '#0891b2';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('吸嘴头', headX, headY + headH + 24);
+
+    // ---- Step label overlay ----
+    ctx.fillStyle = 'rgba(15,23,42,0.8)';
+    ctx.fillRect(w/2 - 60, 60, 120, 28);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(steps[animStep].label, w/2, 80);
+
+    // ---- Highlight active area ----
+    if (animStep === 0) {
+      // Highlight PCB entry
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4,4]);
+      ctx.strokeRect(pcbX - 4, pcbY - 4, pcbW + 8, pcbH + 8);
+      ctx.setLineDash([]);
+    } else if (animStep === 1) {
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4,4]);
+      ctx.strokeRect(feederX - 4, beltY - feederH - 14, feederW + 8, feederH + 8);
+      ctx.setLineDash([]);
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  function roundRect2(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : -1 + (4-2*t)*t; }
+
+  resize();
+  draw();
+  window.addEventListener('resize', resize);
+
+  stepPrev.addEventListener('click', () => { if (animStep > 0) { animStep--; updateStep(); } });
+  stepNext.addEventListener('click', () => { if (animStep < 5) { animStep++; updateStep(); } });
+})();
+
+// ====================== Features Demos ======================
+// --- Vision Demo ---
+(function initVisionDemo() {
+  const canvas = document.getElementById('visionDemo');
+  const wrap = canvas.parentElement;
+  let w,h,ctx,dpr, mode = 'with';
+  let phase = 0;
+  const btns = canvas.parentElement.querySelectorAll('.demo-toggle button');
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      mode = btn.dataset.mode;
+    });
   });
+
+  function resize() {
+    w = wrap.clientWidth; h = wrap.clientHeight;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    phase += 0.03;
+
+    const cx = w/2, cy = h/2;
+    const r = Math.min(w,h) * 0.2;
+
+    // Target
+    ctx.strokeStyle = '#94a3b8';
+    ctx.setLineDash([3,3]);
+    ctx.strokeRect(cx-25, cy-25, 50, 50);
+    ctx.setLineDash([]);
+    // Crosshair
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx-35, cy); ctx.lineTo(cx+35, cy);
+    ctx.moveTo(cx, cy-35); ctx.lineTo(cx, cy+35);
+    ctx.stroke();
+
+    if (mode === 'with') {
+      // Component aligned well
+      const compX = cx + 2 * Math.sin(phase * 0.5);
+      const compY = cy + 2 * Math.cos(phase * 0.7);
+      const angle = 0.02 * Math.sin(phase);
+
+      ctx.save();
+      ctx.translate(compX, compY);
+      ctx.rotate(angle);
+      ctx.fillStyle = '#0891b2';
+      ctx.shadowColor = 'rgba(8,145,178,0.3)';
+      ctx.shadowBlur = 6;
+      ctx.fillRect(-8, -6, 16, 12);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff';
+      ctx.font = '6px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('OK', 0, 2);
+      ctx.restore();
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✓ 精准对位', w/2, h - 10);
+    } else {
+      // Component misaligned
+      const compX = cx + 12 * Math.sin(phase * 2);
+      const compY = cy + 8 * Math.cos(phase * 1.7);
+      const angle = 0.3 * Math.sin(phase * 1.5);
+
+      ctx.save();
+      ctx.translate(compX, compY);
+      ctx.rotate(angle);
+      ctx.fillStyle = '#ef4444';
+      ctx.shadowColor = 'rgba(239,68,68,0.3)';
+      ctx.shadowBlur = 6;
+      ctx.fillRect(-8, -6, 16, 12);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff';
+      ctx.font = '6px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✗', 0, 2);
+      ctx.restore();
+
+      ctx.fillStyle = '#ef4444';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✗ 偏移/歪斜', w/2, h - 10);
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  draw();
+  window.addEventListener('resize', resize);
 })();
 
-// Feature Demos
-(function(){
-  const canvas=document.getElementById('visionDemo'),wrap=canvas.parentElement;
-  let w,h,ctx,phase=0,mode='with';
-  canvas.parentElement.nextElementSibling.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click',()=>{canvas.parentElement.nextElementSibling.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode;document.getElementById('visionAccuracy').textContent=mode==='with'?'±25μm':'±100μm';document.getElementById('visionComp').textContent=mode==='with'?'自动':'无';});
+// --- Speed Demo ---
+(function initSpeedDemo() {
+  const canvas = document.getElementById('speedDemo');
+  const wrap = canvas.parentElement;
+  let w,h,ctx,dpr, mode = 'multi';
+  let phase = 0;
+  const btns = canvas.parentElement.querySelectorAll('.demo-toggle button');
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      mode = btn.dataset.mode;
+    });
   });
-  function resize(){w=wrap.clientWidth;h=wrap.clientHeight;ctx=resizeCanvas(canvas,w,h);}
-  function draw(){ctx.clearRect(0,0,w,h);phase+=0.03*animationSpeed;ctx.fillStyle='#0ea5e9';roundRect(ctx,w*0.1,h*0.6,w*0.3,h*0.3,4);ctx.fill();ctx.fillStyle='#f59e0b';roundRect(ctx,w*0.2,h*0.7,24,14,2);ctx.fill();const nx=w*0.6+Math.sin(phase)*20,ny=h*0.35;ctx.fillStyle='#64748b';ctx.fillRect(nx-10,ny,20,35);const ox=mode==='without'?Math.sin(phase*2)*10:0,oy=mode==='without'?Math.cos(phase*2)*5:0;ctx.fillStyle='#f59e0b';roundRect(ctx,nx-8+ox,ny+35+oy,16,10,2);ctx.fill();if(mode==='with'){ctx.fillStyle='#8b5cf6';ctx.beginPath();ctx.arc(w*0.6,h*0.15,18,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('📷',w*0.6,h*0.19);ctx.strokeStyle='rgba(139,92,246,0.6)';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(w*0.6,h*0.18);ctx.lineTo(nx,ny+40);ctx.stroke();ctx.setLineDash([]);}ctx.fillStyle=mode==='with'?'#10b981':'#ef4444';ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillText(mode==='with'?'✓ 精准对位':'✗ 位置偏差',w*0.75,h*0.85);requestAnimationFrame(draw);}
-  resize();draw();window.addEventListener('resize',resize);
+
+  function resize() {
+    w = wrap.clientWidth; h = wrap.clientHeight;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    phase += 0.02;
+
+    // PCB row at bottom
+    const pcbY = h - 25;
+    const boardW = w * 0.6;
+    const boardX = w/2 - boardW/2;
+    ctx.fillStyle = '#0d9488';
+    ctx.fillRect(boardX, pcbY, boardW, 20);
+    // Pads
+    for (let px = boardX + 8; px < boardX + boardW - 8; px += 18) {
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(px, pcbY + 4, 6, 3);
+      ctx.fillRect(px, pcbY + 13, 6, 3);
+    }
+
+    // Components being placed
+    const count = mode === 'multi' ? 4 : 1;
+    for (let i = 0; i < count; i++) {
+      const offset = mode === 'multi' ? i : 0;
+      const x = boardX + 8 + (offset * 18) + (phase * 60) % boardW;
+      const y = pcbY - 10 - 8 * Math.abs(Math.sin(phase * 3 + i));
+      ctx.fillStyle = '#0891b2';
+      ctx.fillRect(x-4, y-4, 8, 6);
+    }
+
+    // Stats
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    const rate = mode === 'multi' ? '30,000 CPH' : '8,000 CPH';
+    ctx.fillText(`贴装速度: ${rate}`, w/2, 16);
+    ctx.font = '9px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(mode === 'multi' ? '4个吸嘴同时工作' : '1个吸嘴逐个贴装', w/2, 30);
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  draw();
+  window.addEventListener('resize', resize);
 })();
 
-(function(){
-  const canvas=document.getElementById('speedDemo'),wrap=canvas.parentElement;
-  let w,h,ctx,phase=0,mode='multi';
-  canvas.parentElement.nextElementSibling.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click',()=>{canvas.parentElement.nextElementSibling.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode;document.getElementById('speedCPH').textContent=mode==='multi'?'30,000 CPH':'8,000 CPH';document.getElementById('speedNozzle').textContent=mode==='multi'?'8个':'1个';});
+// --- Error Prevention Demo ---
+(function initErrorDemo() {
+  const canvas = document.getElementById('errorDemo');
+  const wrap = canvas.parentElement;
+  let w,h,ctx,dpr, mode = 'with';
+  let phase = 0;
+  const btns = canvas.parentElement.querySelectorAll('.demo-toggle button');
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      mode = btn.dataset.mode;
+    });
   });
-  function resize(){w=wrap.clientWidth;h=wrap.clientHeight;ctx=resizeCanvas(canvas,w,h);}
-  function draw(){ctx.clearRect(0,0,w,h);phase+=0.03*animationSpeed;const nc=mode==='multi'?8:1;const hx=w*0.5+Math.sin(phase)*60,hy=h*0.25;ctx.fillStyle='#3b82f6';roundRect(ctx,hx-55,hy-18,110,36,8);ctx.fill();for(let i=0;i<nc;i++){const nx=hx-45+(i*90/nc);ctx.fillStyle='#f59e0b';ctx.fillRect(nx-3,hy+18,6,28);ctx.beginPath();ctx.arc(nx,hy+48,4,0,Math.PI*2);ctx.fill();}ctx.fillStyle='#e2e8f0';roundRect(ctx,w*0.08,h*0.5,70,h*0.4,8);ctx.fill();ctx.fillStyle='#64748b';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText('Feeder',w*0.08+35,h*0.72);ctx.fillStyle='#0ea5e9';roundRect(ctx,w*0.7,h*0.55,90,50,6);ctx.fill();ctx.fillStyle='#fff';ctx.font='11px sans-serif';ctx.fillText('PCB',w*0.745,h*0.62);ctx.fillStyle=mode==='multi'?'#10b981':'#f59e0b';ctx.font='bold 14px sans-serif';ctx.textAlign='left';ctx.fillText(mode==='multi'?'⚡ 高速模式':'🐢 普通模式',w*0.08,h*0.15);requestAnimationFrame(draw);}
-  resize();draw();window.addEventListener('resize',resize);
+
+  function resize() {
+    w = wrap.clientWidth; h = wrap.clientHeight;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    phase += 0.04;
+
+    // Conveyor with items
+    const cy = h * 0.55;
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, cy);
+    ctx.lineTo(w, cy);
+    ctx.stroke();
+
+    if (mode === 'with') {
+      // All good PCBs
+      for (let i = 0; i < 5; i++) {
+        const x = 20 + i * (w - 40) / 5;
+        const y = cy - 20 + 3 * Math.sin(phase * 2 + i);
+        if (i === 2) {
+          // This one is marked as bad - skip
+          ctx.strokeStyle = '#ef4444';
+          ctx.setLineDash([3,3]);
+          ctx.strokeRect(x-12, y-10, 24, 20);
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#ef4444';
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('⛔ 坏板跳过', x, y + 4);
+        } else {
+          ctx.fillStyle = '#10b981';
+          ctx.shadowColor = 'rgba(16,185,129,0.3)';
+          ctx.shadowBlur = 4;
+          ctx.fillRect(x-10, y-8, 20, 16);
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#fff';
+          ctx.font = '6px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('OK', x, y+3);
+        }
+      }
+      ctx.fillStyle = '#10b981';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✓ 坏板被标记跳过，良品正常贴装', w/2, h - 8);
+    } else {
+      // Bad PCB gets processed anyway
+      for (let i = 0; i < 5; i++) {
+        const x = 20 + i * (w - 40) / 5;
+        const y = cy - 20 + 3 * Math.sin(phase * 2 + i);
+        if (i === 2) {
+          // Bad PCB that got through
+          ctx.fillStyle = '#ef4444';
+          ctx.shadowColor = 'rgba(239,68,68,0.3)';
+          ctx.shadowBlur = 4;
+          ctx.fillRect(x-10, y-8, 20, 16);
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#fff';
+          ctx.font = '6px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('✗', x, y+3);
+          // Arrow pointing to problem
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x, y-15);
+          ctx.lineTo(x, y-30);
+          ctx.stroke();
+          ctx.fillStyle = '#ef4444';
+          ctx.font = '8px sans-serif';
+          ctx.fillText('坏品流出', x, y-34);
+        } else {
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(x-10, y-8, 20, 16);
+          ctx.fillStyle = '#fff';
+          ctx.font = '6px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('OK', x, y+3);
+        }
+      }
+      ctx.fillStyle = '#ef4444';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✗ 无检测环节，缺陷品流到下一工序', w/2, h - 8);
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  draw();
+  window.addEventListener('resize', resize);
 })();
 
-(function(){
-  const canvas=document.getElementById('errorDemo'),wrap=canvas.parentElement;
-  let w,h,ctx,phase=0,mode='with';
-  canvas.parentElement.nextElementSibling.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click',()=>{canvas.parentElement.nextElementSibling.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode;document.getElementById('errorYield').textContent=mode==='with'?'99.9%':'95%';document.getElementById('errorCheck').textContent=mode==='with'?'实时':'抽检';});
+// ====================== Simulation ======================
+(function initSim() {
+  const canvas = document.getElementById('simCanvas');
+  const wrap = canvas.parentElement;
+  let w,h,ctx,dpr;
+  let running = false;
+  let speed = 1;
+  let simTime = 0;
+  let placed = 0;
+  let cycles = 0;
+
+  const playBtn = document.getElementById('simPlayBtn');
+  const resetBtn = document.getElementById('simResetBtn');
+  const simCount = document.getElementById('simCount');
+  const simCycles = document.getElementById('simCycles');
+  const speedBtns = document.querySelectorAll('.speed-btn');
+
+  speedBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      speedBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      speed = parseInt(btn.dataset.speed);
+    });
   });
-  function resize(){w=wrap.clientWidth;h=wrap.clientHeight;ctx=resizeCanvas(canvas,w,h);}
-  function draw(){ctx.clearRect(0,0,w,h);phase+=0.03*animationSpeed;for(let i=0;i<6;i++){const x=w*0.1+i*28,y=h*0.5;const isGood=mode==='with'||i<5;ctx.fillStyle=isGood?'#10b981':'#ef4444';roundRect(ctx,x,y,22,14,2);ctx.fill();if(!isGood){ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+22,y+14);ctx.moveTo(x+22,y);ctx.lineTo(x,y+14);ctx.stroke();}}if(mode==='with'){const lx=w*0.4+Math.sin(phase)*80;ctx.fillStyle='#8b5cf6';ctx.beginPath();ctx.arc(lx,h*0.2,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(139,92,246,0.15)';ctx.beginPath();ctx.moveTo(lx-30,h*0.22);ctx.lineTo(lx+30,h*0.22);ctx.lineTo(lx+40,h*0.52);ctx.lineTo(lx-40,h*0.52);ctx.closePath();ctx.fill();}ctx.fillStyle=mode==='with'?'#10b981':'#f59e0b';ctx.beginPath();ctx.arc(w*0.88,h*0.2,22,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText(mode==='with'?'✓':'!',w*0.88,h*0.25);ctx.fillStyle=mode==='with'?'#10b981':'#f59e0b';ctx.font='12px sans-serif';ctx.fillText(mode==='with'?'实时检测':'仅抽检',w*0.88,h*0.35);requestAnimationFrame(draw);}
-  resize();draw();window.addEventListener('resize',resize);
-})();
 
-// Brands
-(function(){
-  const tabs=document.getElementById('brandsTabs'),content=document.getElementById('brandsContent');
-  brands.forEach((brand,i)=>{const tab=document.createElement('button');tab.className='brand-tab'+(i===0?' active':'');tab.textContent=brand.name;tab.addEventListener('click',()=>{document.querySelectorAll('.brand-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');document.querySelectorAll('.brand-content').forEach(c=>c.classList.remove('active'));document.getElementById('brand-'+brand.name).classList.add('active');});tabs.appendChild(tab);const div=document.createElement('div');div.className='brand-content'+(i===0?' active':'');div.id='brand-'+brand.name;div.innerHTML=`<div class="brand-header"><div class="brand-logo" style="background:${brand.color}">${brand.name.charAt(0)}</div><div class="brand-info"><h3>${brand.name}</h3><p>${brand.country} · ${brand.position}</p></div></div><div class="brand-stats"><div class="stat-card"><div class="label">速度 (CPH)</div><div class="value">${brand.speed}</div></div><div class="stat-card"><div class="label">贴装精度</div><div class="value">${brand.precision}</div></div><div class="stat-card"><div class="label">核心优势</div><div class="value" style="font-size:14px;">${brand.features[0]}</div></div><div class="stat-card"><div class="label">典型场景</div><div class="value" style="font-size:14px;">${brand.scenes[0]}</div></div></div><div class="brand-features">${brand.features.map(f=>`<div class="brand-feature"><span class="check">✓</span><div class="text"><h4>${f}</h4></div></div>`).join('')}${brand.scenes.slice(1).map(s=>`<div class="brand-feature"><span class="check" style="color:#3b82f6;">●</span><div class="text"><p>${s}</p></div></div>`).join('')}</div>`;content.appendChild(div);});
-})();
+  playBtn.addEventListener('click', () => {
+    running = !running;
+    playBtn.textContent = running ? '⏸ 暂停' : '▶ 播放';
+    playBtn.classList.toggle('running', running);
+  });
 
-// Problems
-(function(){const list=document.getElementById('problemsList');problems.forEach((p,i)=>{const item=document.createElement('div');item.className='problem-item';item.innerHTML=`<div class="problem-num">${i+1}</div><div class="problem-text"><h4>${p.title}</h4><p>${p.desc}</p></div><span class="problem-tag">${p.tag}</span>`;list.appendChild(item);});})();
+  resetBtn.addEventListener('click', () => {
+    running = false;
+    playBtn.textContent = '▶ 播放';
+    playBtn.classList.remove('running');
+    simTime = 0; placed = 0; cycles = 0;
+    simCount.textContent = '0';
+    simCycles.textContent = '0';
+  });
+
+  function resize() {
+    w = wrap.clientWidth; h = wrap.clientHeight;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+  }
+
+  let nozzles = [
+    { x: 0, y: 0, hasPart: false, targetX: 0, targetY: 0 },
+    { x: 0, y: 0, hasPart: false, targetX: 0, targetY: 0 },
+    { x: 0, y: 0, hasPart: false, targetX: 0, targetY: 0 },
+    { x: 0, y: 0, hasPart: false, targetX: 0, targetY: 0 },
+  ];
+  for (const n of nozzles) {
+    n.x = w * 0.5 + (Math.random()-0.5)*100;
+    n.y = 60;
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0,0,w,h);
+
+    if (running) {
+      simTime += 0.02 * speed;
+    }
+
+    // ---- Background grid ----
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += 30) {
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+    }
+    for (let y = 0; y < h; y += 30) {
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+    }
+
+    // ---- Machine frame ----
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1.5;
+    roundRect3(ctx, 5, 5, w-10, h-10, 6);
+    ctx.stroke();
+
+    // ---- Gantry rails ----
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(15, 40, w-30, 5);
+    ctx.fillRect(15, h-80, w-30, 5);
+
+    // ---- Feeder (left side) ----
+    const feederX = 25;
+    const feederY = h * 0.3;
+    const feederW = 35;
+    const feederH = h * 0.35;
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(feederX, feederY, feederW, feederH);
+    // Component pockets
+    for (let py = 0; py < 8; py++) {
+      const pocketY = feederY + 8 + py * 10;
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(feederX + feederW/2, pocketY, 3, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '8px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('FEEDER', feederX + feederW/2, feederY + feederH + 12);
+
+    // ---- PCB (center) ----
+    const pcbW = w * 0.35;
+    const pcbH = h * 0.18;
+    const pcbX = w/2 - pcbW/2;
+    const pcbY = h - pcbH - 25;
+
+    ctx.fillStyle = '#0d9488';
+    ctx.shadowColor = 'rgba(13,148,136,0.3)';
+    ctx.shadowBlur = 6;
+    ctx.fillRect(pcbX, pcbY, pcbW, pcbH);
+    ctx.shadowBlur = 0;
+
+    // Pads
+    for (let px = pcbX + 6; px < pcbX + pcbW - 6; px += 16) {
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(px, pcbY + 6, 6, 3);
+      ctx.fillRect(px, pcbY + pcbH - 9, 6, 3);
+    }
+
+    // ---- Components already placed ----
+    const maxPlace = Math.min(placed, 20);
+    for (let i = 0; i < maxPlace; i++) {
+      const cx = pcbX + 8 + (i * 16) % (pcbW - 16);
+      const cy = pcbY + 6 + Math.floor((i * 16) / (pcbW - 16)) * 12;
+      if (cy < pcbY + pcbH - 6) {
+        ctx.fillStyle = i % 3 === 0 ? '#0891b2' : i % 3 === 1 ? '#8b5cf6' : '#f59e0b';
+        ctx.fillRect(cx, cy, 5, 4);
+      }
+    }
+
+    // ---- Nozzle animation ----
+    const t = simTime % 2;
+    for (let ni = 0; ni < nozzles.length; ni++) {
+      const n = nozzles[ni];
+      const offset = ni * 0.5;
+      const nt = (t + offset) % 2;
+      let nx, ny;
+
+      if (nt < 0.4) {
+        // Move to feeder
+        nx = feederX + feederW/2 + Math.sin(nt/0.4 * Math.PI) * 50;
+        ny = feederY + 20 + (1 - nt/0.4) * 30;
+        if (nt > 0.3) n.hasPart = true;
+      } else if (nt < 0.7) {
+        // Move to camera (vision)
+        const fromX = feederX + feederW/2;
+        const toX = w * 0.4;
+        const prog = (nt - 0.4) / 0.3;
+        nx = fromX + (toX - fromX) * easeInOut(prog);
+        ny = 50 + 10 * Math.sin(prog * Math.PI);
+      } else if (nt < 1.2) {
+        // Move to PCB
+        const fromX = w * 0.4;
+        const toX = pcbX + pcbW/2 + (ni - 1.5) * 10;
+        const prog = (nt - 0.7) / 0.5;
+        nx = fromX + (toX - fromX) * easeInOut(prog);
+        ny = 50 + (1 - easeInOut(prog)) * 30;
+        if (nt > 1.1) { n.hasPart = false; if (running && ni === 0) { placed++; simCount.textContent = placed; } }
+      } else {
+        // Return
+        const fromX = pcbX + pcbW/2;
+        const toX = w/2;
+        const prog = (nt - 1.2) / 0.8;
+        nx = fromX + (toX - fromX) * prog;
+        ny = 50 + prog * 30;
+      }
+
+      // Draw nozzle
+      ctx.fillStyle = `hsl(${190 + ni * 20}, 70%, ${50 + ni * 5}%)`;
+      ctx.fillRect(nx-5, ny-4, 10, 8);
+      if (n.hasPart) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(nx-3, ny+4, 6, 4);
+      }
+    }
+
+    // Cycle counter
+    if (running && simTime % 2 < 0.02) {
+      cycles++;
+      simCycles.textContent = cycles;
+    }
+
+    // ---- Labels ----
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`速度: ${speed}×`, 15, 18);
+    ctx.textAlign = 'right';
+    ctx.fillText(`放置间隔: ~${(0.35/speed*1000).toFixed(0)}ms/件`, w-15, 18);
+
+    requestAnimationFrame(draw);
+  }
+
+  function roundRect3(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : -1 + (4-2*t)*t; }
+
+  resize();
+  draw();
+  window.addEventListener('resize', resize);
+})();
 </script>
 </body>
 </html>
